@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from scripts.fetch_wiki import WikiFetcher
 from app.ingest import DocumentIngestor
 from app.config import Settings
@@ -70,3 +71,20 @@ if __name__ == "__main__":
     
     ingestor = DocumentIngestor()
     ingestor.process_and_store()
+=======
+from scripts.fetch_wiki import WikiFetcher
+from app.ingest import DocumentIngestor
+from app.config import Settings
+
+if __name__ == "__main__":
+    
+    
+    #fetcher = WikiFetcher()
+
+    
+    #fetcher.fetch_and_save()
+    
+    
+    ingestor = DocumentIngestor()
+    ingestor.process_and_store()
+>>>>>>> 0e3c223 (Save local changes before pull)
