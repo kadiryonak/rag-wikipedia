@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import logging
 import json
 from pathlib import Path
@@ -76,7 +75,7 @@ class DocumentIngestor:
             current_chunk.append(sent)
             current_len += sent_len
 
-        # Son kalan chunk
+
         if current_chunk:
             chunks.append(" ".join(current_chunk))
 
@@ -134,8 +133,8 @@ class DocumentIngestor:
         except Exception as e:
             logger.error(f"Genel işlem hatası: {e}")
 
-=======
-# app/ingest.py
+
+
 import logging
 import json
 from pathlib import Path
@@ -147,7 +146,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct
 from config import ettings
 
-nltk.download("punkt")  # cümle tokenizasyonu için
+nltk.download("punkt")  
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -162,7 +161,7 @@ class DocumentIngestor:
         data_dir: str = None,
         chunk_dir: str = "chunks",
         qdrant_host: str = "localhost",
-        qdrant_port: int = 6333,
+        qdrant_port: int = ****,
         collection_name: str = "wiki_collection",
         embed_model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
         chunk_token_limit: int = 500,
@@ -274,4 +273,4 @@ class DocumentIngestor:
 
 
 
->>>>>>> 0e3c223 (Save local changes before pull)
+
