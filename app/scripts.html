@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Türkçe RAG Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            min-height: 600px;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .question-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .question-box:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .question-box h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .question-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .ask-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .ask-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .ask-button:active {
+            transform: translateY(0);
+        }
+
+        .ask-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .answer-box {
+            background: #d4edda;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #28a745;
+            flex: 1;
+        }
+
+        .answer-box h3 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .answer-content {
+            color: #155724;
+            line-height: 1.6;
+            font-size: 16px;
+            min-height: 100px;
+        }
+
+        .sources-box {
+            background: #e7f3ff;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #007bff;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .sources-box h4 {
+            color: #004085;
+            margin-bottom: 15px;
+        }
+
+        .source-item {
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #b8daff;
+        }
+
+        .source-title {
+            font-weight: 600;
+            color: #004085;
+            margin-bottom: 5px;
+        }
+
+        .source-content {
+            color: #495057;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-info {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Türkçe RAG Sistemi</h1>
+            <p>Verilerinizi sorgulayın, akıllı yanıtlar alın</p>
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="question-box">
+                    <h3>❓ Sorunuzu Yazın</h3>
+                    <textarea 
+                        id="questionInput" 
+                        class="question-input" 
+                        placeholder="Örn: Bu veriler hakkında ne biliyorsun?"
+                    ></textarea>
+                    <button id="askButton" class="ask-button">🔍 Soru Sor</button>
+                </div>
+                <!-- Örnek sorular kısmı buradan kaldırıldı -->
+            </div>
+
+            <div class="right-panel">
+                <div class="answer-box">
+                    <h3>💬 Yanıt</h3>
+                    <div id="answerContent" class="answer-content">
+                        Soru sormak için sol paneli kullanın...
+                    </div>
+                </div>
+
+                <div class="sources-box">
+                    <h4>📚 Kaynak Dökümanlar</h4>
+                    <div id="sourcesContent">
+                        Kaynak dökümanlar burada görünecek...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-info">
+                <span>📊 Sistem Durumu: </span>
+                <span id="systemStatus">Hazır</span>
+            </div>
+            <div class="status-info">
+                <span>⏱️ Son Sorgu: </span>
+                <span id="lastQuery">-</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global değişkenler
+        let isLoading = false;
+
+        // DOM elementleri
+        const questionInput = document.getElementById('questionInput');
+        const askButton = document.getElementById('askButton');
+        const answerContent = document.getElementById('answerContent');
+        const sourcesContent = document.getElementById('sourcesContent');
+        const systemStatus = document.getElementById('systemStatus');
+        const lastQuery = document.getElementById('lastQuery');
+
+        // Event listeners
+        askButton.addEventListener('click', askQuestion);
+        questionInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                askQuestion();
+            }
+        });
+
+        // Ana soru sorma fonksiyonu
+        async function askQuestion() {
+            const question = questionInput.value.trim();
+            
+            if (!question) {
+                alert('Lütfen bir soru yazın!');
+                return;
+            }
+
+            if (isLoading) {
+                return;
+            }
+
+            setLoading(true);
+            
+            try {
+                // Gerçek backend'e istek
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: question
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayAnswer({
+                        answer: result.answer,
+                        sources: result.sources
+                    });
+                } else {
+                    throw new Error(result.error || 'Bilinmeyen hata');
+                }
+                
+                lastQuery.textContent = new Date().toLocaleTimeString('tr-TR');
+            } catch (error) {
+                displayError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Sistem durumunu kontrol et
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/status');
+                const status = await response.json();
+                
+                if (status.ready) {
+                    systemStatus.textContent = 'Hazır';
+                    systemStatus.style.color = '#28a745';
+                } else {
+                    systemStatus.textContent = status.status || 'Yükleniyor...';
+                    systemStatus.style.color = '#ffc107';
+                    
+                    // Sistem hazır değilse 2 saniye sonra tekrar kontrol et
+                    setTimeout(checkSystemStatus, 2000);
+                }
+            } catch (error) {
+                systemStatus.textContent = 'Bağlantı hatası';
+                systemStatus.style.color = '#dc3545';
+                setTimeout(checkSystemStatus, 5000);
+            }
+        }
+
+        // Loading durumunu ayarlama
+        function setLoading(loading) {
+            isLoading = loading;
+            askButton.disabled = loading;
+            
+            if (loading) {
+                answerContent.innerHTML = '<div class="loading">Cevap aranıyor...</div>';
+                askButton.textContent = '⏳ Aranıyor...';
+                systemStatus.textContent = 'İşleniyor...';
+            } else {
+                askButton.textContent = '🔍 Soru Sor';
+                systemStatus.textContent = 'Hazır';
+            }
+        }
+
+        // Cevabı görüntüleme
+        function displayAnswer(response) {
+            answerContent.innerHTML = `<p>${response.answer}</p>`;
+            
+            if (response.sources && response.sources.length > 0) {
+                let sourcesHTML = '';
+                response.sources.forEach((source, index) => {
+                    sourcesHTML += `
+                        <div class="source-item">
+                            <div class="source-title">${index + 1}. ${source.title}</div>
+                            <div class="source-content">${source.content}</div>
+                        </div>
+                    `;
+                });
+                sourcesContent.innerHTML = sourcesHTML;
+            } else {
+                sourcesContent.innerHTML = 'Kaynak döküman bulunamadı.';
+            }
+        }
+        
+        // Hata görüntüleme
+        function displayError(error) {
+            answerContent.innerHTML = `<p style="color: #dc3545;">❌ Hata: ${error}</p>`;
+            sourcesContent.innerHTML = 'Hata nedeniyle kaynak dökümanlar yüklenemedi.';
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            questionInput.focus();
+            checkSystemStatus(); // İlk durum kontrolü
+        });
+    </script>
+</body>
+</html>
+
+
