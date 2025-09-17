@@ -34,22 +34,19 @@ Internet connection (for API-based models like DeepSeek/OpenAI)
 Installation & Setup
 Clone the repository:
 
-bash
 git clone https://github.com/kadiryonak/rag-wikipedia.git
 cd rag-wikipedia
 Install required packages:
 
-bash
 pip install -r requirements.txt
 Configure your API Key (Optional for DeepSeek/OpenAI):
 Edit the apiKey.py file or set an environment variable:
 
-bash
+
 # Edit apiKey.py or use:
 export DEEPSEEK_API_KEY="sk-your-actual-key-here"
 Run the system:
 
-bash
 python run_system.py
 The script will guide you through the options: starting the web interface, interactive test mode, or system check.
 
@@ -68,12 +65,12 @@ View the generated answer and the source documents it was derived from.
 Command Line Interface
 For a direct terminal-based interaction:
 
-bash
+
 python main.py
 API Usage
 You can interact with the system directly via its REST API:
 
-bash
+
 # Check system status
 curl http://localhost:5000/status
 
@@ -162,6 +159,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 🙋‍♂️ Support
 If you have any questions or run into issues, please open an issue on this GitHub repository.
+
 
 
 
